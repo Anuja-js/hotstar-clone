@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hotstar/customs/custom_button.dart';
 import 'package:hotstar/customs/custom_colors.dart';
 import 'package:hotstar/customs/text_custom.dart';
+import 'package:hotstar/network/network_home.dart';
 import 'package:hotstar/screens/bottom_screens/bottom_appbar_page.dart';
 
 class LanguageSelectionPage extends StatefulWidget {
@@ -46,7 +47,11 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   ];
 
   final Set<String> selectedLanguages = {};
-
+  @override
+  void initState() {
+    HomeNetWork().getMovieData();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

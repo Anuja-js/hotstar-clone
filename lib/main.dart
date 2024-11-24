@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hotstar/screens/bottom_screens/empty_search.dart';
 import 'package:hotstar/screens/splash/splash_screen_first.dart';
 
 void main() {

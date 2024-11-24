@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hotstar/customs/custom_colors.dart';
 import 'package:hotstar/customs/text_custom.dart';
+import 'package:hotstar/model/MovieLIstModel.dart';
+import 'package:hotstar/network/network_home.dart';
+import 'package:hotstar/screens/bottom_screens/empty_search.dart';
 
 class TrendingScreen extends StatefulWidget {
   @override
@@ -12,10 +15,12 @@ class TrendingScreen extends StatefulWidget {
 class _TrendingScreenState extends State<TrendingScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
+   TextEditingController Searchcontroller=TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    getMovieData();
     tabController = TabController(length: 5, vsync: this);
     tabController.addListener(() {
       setState(() {});
@@ -36,8 +41,10 @@ class _TrendingScreenState extends State<TrendingScreen>
         backgroundColor: GlobelColors.bottomAppbar,
         appBar: AppBar(
           backgroundColor: GlobelColors.bottomAppbar,
-          title: TextField(
-            cursorColor: primaryColor,
+          title: TextField(onChanged: (value){
+            searchMovies(value);
+            },
+            cursorColor: primaryColor,controller:Searchcontroller,
             decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.r), // Rounded corners
@@ -90,7 +97,7 @@ class _TrendingScreenState extends State<TrendingScreen>
                   buildTab('India', 0),
                   buildTab('Movies', 1),
                   buildTab('Shows', 2),
-                  buildTab('Kids', 3),
+                  buildTab('Drama', 3),
                   buildTab('Action', 4),
                 ],
               ),
@@ -114,61 +121,107 @@ class _TrendingScreenState extends State<TrendingScreen>
   }
 
   Widget buildTrendingGrid() {
-    return MasonryGridView.builder(
-      gridDelegate:
-          SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      itemCount: 12,
-      padding: const EdgeInsets.all(16.0),
-      mainAxisSpacing: 16.0,
-      crossAxisSpacing: 16.0,
-      itemBuilder: (context, index) {
-        return _buildTrendingItem(
-          imageUrl: 'assets/images/p2.jpeg',
-          title: 'Trending Title $index',
-          label: 'FREE',
-        );
-      },
-    );
+    if(isPresent==false){return NoSearchHistory(name: Searchcontroller.text,);}else{
+      return MasonryGridView.builder(
+        gridDelegate:
+        SliverSimpleGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemCount: movieList.length,
+        padding: const EdgeInsets.all(16.0),
+        mainAxisSpacing: 16.0,
+        crossAxisSpacing: 16.0,
+        itemBuilder: (context, index) {
+          return buildTrendingItem(
+              imageUrl: movieList[index].posterUrl.toString(),
+              title: 'Trending Title $index',
+              isFree: movieList[index].isFree!,
+              isNewRelease: movieList[index].isNewRelease!,
+              isNewSeason:movieList[index].seasons==null?false:true
+          );
+        },
+      );
+    }
+
   }
 
-  Widget _buildTrendingItem({
+  Widget buildTrendingItem({
     required String imageUrl,
-    required String title,
-    required String label,
+    required String title,required bool isFree,
+    required bool isNewRelease,
+    required bool isNewSeason,
   }) {
     double randomHeight =
         (150 + (title.hashCode % 3) * 50).toDouble(); // Variable height
-    return Container(
-      height: randomHeight, // Set dynamic height
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: Image.asset(
-              imageUrl,
-              width: double.infinity,
-              height: randomHeight,
-              fit: BoxFit.cover,
+    return Stack(
+      children: [
+        Container(
+          height: randomHeight, // Set dynamic height
+          child:
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.network(
+                  imageUrl,
+                  width: double.infinity,
+                  height: randomHeight,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+
+        ),   if(isFree)  Positioned(
+          top: 8,
+          left: 8,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5.r),
+              color: Colors.blue,
+            ),
+            child: TextCustom(
+              text: "Free",
+              color: primaryColor,
+              textSize: 8.sp,
             ),
           ),
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.r),
-                color: Colors.blue,
-              ),
+        ),
+       if(isNewRelease)Positioned(
+          bottom: 10,
+          left: 40,
+          right: 40,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Color(0xff1f4143),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Center(
               child: TextCustom(
-                text: "New",
-                color: primaryColor,
-                textSize: 8.sp,
+                text: "New Release",
+                textSize: 6.sp,
+                overflow: TextOverflow.visible,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+       if(isNewSeason)Positioned(
+          bottom: 10,
+          left: 40,
+          right: 40,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Color(0xff1f4143),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Center(
+              child: TextCustom(
+                text: "New Season",
+                textSize: 6.sp,
+                overflow: TextOverflow.visible,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -178,6 +231,11 @@ class _TrendingScreenState extends State<TrendingScreen>
     return InkWell(
       onTap: () {
         tabController.index = index;
+        isLoading=true;
+
+          getCategoryMovieData(label);
+
+        isLoading=false;
         setState(() {});
       },
       child: Container(
@@ -220,4 +278,49 @@ class _TrendingScreenState extends State<TrendingScreen>
       ),
     );
   }
+  List<Movie> movieList=[];
+  List<Movie> allMovies=[];
+  bool isLoading=false;
+  bool isPresent=true;
+  void getMovieData()async{
+
+    movieList= await HomeNetWork().getMovieData();
+    allMovies=movieList;
+    setState(() {
+
+    });}
+
+  void getCategoryMovieData(String name)async{
+
+    if (name == "Movies") {
+      print(name);
+
+      movieList = allMovies.where((element) => element.seasons ==null).toList();
+
+    }
+    else if (name == "Shows") {
+      movieList = allMovies.where((element) => element.seasons!= null).toList();
+    }else if (name == "Action") {
+      movieList = allMovies.where((element) => element.genre!.contains("Action") ).toList();
+    }else if (name == "Drama") {
+      movieList = allMovies.where((element) => element.genre!.contains("Drama") ).toList();
+    }
+else{
+  movieList=allMovies;
+    }
+    setState(() {
+
+    });}
+  void searchMovies(String search)async{
+    movieList = allMovies.where((element) => element.title!.toLowerCase().contains(search.toLowerCase()) ).toList();
+    if(movieList.isEmpty){
+      isPresent=false;
+    }else{
+      isPresent=true;
+    }
+    setState(() {
+
+    });
+  }
 }
+
