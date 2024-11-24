@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hotstar/customs/custom_colors.dart';
 import 'package:hotstar/customs/text_custom.dart';
-import 'package:hotstar/model/MovieLIstModel.dart';
+import 'package:hotstar/model/movie_list_model.dart';
 import 'package:hotstar/network/network_home.dart';
 import 'package:hotstar/screens/bottom_screens/empty_search.dart';
 

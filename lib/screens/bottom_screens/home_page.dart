@@ -1,20 +1,30 @@
+// ignore_for_file: avoid_types_as_parameter_names, non_constant_identifier_names
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hotstar/customs/card.dart';
 import 'package:hotstar/customs/custom_colors.dart';
 import 'package:hotstar/customs/text_custom.dart';
+import 'package:hotstar/model/genre_model.dart';
+import 'package:hotstar/model/match_list.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../../model/MovieLIstModel.dart';
+import '../../model/language_model.dart';
+import '../../model/movie_list_model.dart';
 import '../../network/network_home.dart';
 
 class HotstarHomePage extends StatefulWidget {
+  const HotstarHomePage({super.key});
+
   @override
   State<HotstarHomePage> createState() => _HotstarHomePageState();
 }
 
 class _HotstarHomePageState extends State<HotstarHomePage> {
+  List<Language> languageSelect = [];
+  List<Matches> matchList = [];
+  List<Genre> genreListSelect = [];
   final CarouselSliderController carouselController =
       CarouselSliderController();
   final ScrollController scontol = ScrollController();
@@ -24,6 +34,9 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
   void initState() {
     super.initState();
     getMovieData();
+    getMatch();
+    getGenre();
+    getLanguages();
     scontol.addListener(() {
       final bool shouldShowBottomSheet = scontol.offset > 0.1;
       if (shouldShowBottomSheet != isBottomSheetVisible) {
@@ -33,10 +46,24 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
       }
     });
   }
+
   @override
   void dispose() {
     scontol.dispose();
     super.dispose();
+  }
+
+  void getLanguages() async {
+    languageSelect = await HomeNetWork().getLangaugeData();
+    setState(() {});
+  }void getMatch() async {
+    matchList = await HomeNetWork().getMatchData();
+    setState(() {});
+  }
+
+  void getGenre() async {
+    genreListSelect = await HomeNetWork().getGenreData();
+    setState(() {});
   }
 
   @override
@@ -59,7 +86,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                     return Container(
                       padding:
                           EdgeInsets.symmetric(vertical: 3.h, horizontal: 16.w),
-                      margin: EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 10),
                       width: MediaQuery.of(context).size.width / 1.6,
                       height: 40.h,
                       decoration: BoxDecoration(
@@ -82,8 +109,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
           body: SingleChildScrollView(
             controller: scontol,
             child: movieList.isEmpty
-                ?
-                  Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -105,7 +131,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                         decoration: BoxDecoration(
                             color: GlobelColors.bottomSheetColor,
                             borderRadius: BorderRadius.circular(8.r),
-                            image: DecorationImage(
+                            image: const DecorationImage(
                               image: AssetImage(
                                 "assets/images/ad.png",
                               ),
@@ -113,7 +139,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                             )),
                       ),
                       latestReleases(),
-                      BrandGrid(),
+                      const BrandGrid(),
                       buildContent(),
                       carasolBanner(1),
                       buildSection(
@@ -207,7 +233,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: TextCustom(
             text: "Latest Releases",
             fontWeight: FontWeight.bold,
@@ -224,7 +250,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
             itemCount: latestList.length,
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (BuildContext context, int index) {
               return MovieCard(
                 title: "Free",
@@ -316,7 +342,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.play_arrow,
                     color: primaryColor,
                   ),
@@ -375,7 +401,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                 color: GlobelColors.bottomSheetColor,
                 borderRadius: BorderRadius.circular(8.r),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.add,
                 color: primaryColor,
               ),
@@ -445,8 +471,6 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
 
   void getCategoryMovieData(String name) async {
     if (name == "Movies") {
-      print(name);
-
       movieList =
           allMovies.where((element) => element.seasons == null).toList();
     } else if (name == "Shows") {
@@ -468,7 +492,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
 
   Widget buildCategorySection(
     String title,
-    List<Map<String, String>> items,
+    List<Language> items,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,8 +521,8 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.asset(
-                        items[index]['image']!,
+                      Image.network(
+                        items[index].bannerImageUrl.toString(),
                         fit: BoxFit.cover,
                       ),
                       Container(
@@ -513,12 +537,62 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        left: 12,
-                        bottom: 12,
-                        child: TextCustom(
-                          text: items[index]['title']!,
-                          textSize: 8.sp,
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildCategorySectionTwo(
+    String title,
+    List<Genre> items,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16, bottom: 12),
+          child: TextCustom(
+            text: title,
+            textSize: 15.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 60.h,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: 120.w,
+                height: 20.h,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        items[index].bannerImageUrl.toString(),
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.7),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -534,18 +608,6 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
 
 // Example usage:
   Widget buildContent() {
-    final languages = [
-      {'title': 'हिंदी', 'image': 'assets/images/bro.jpeg'},
-      {'title': 'English', 'image': 'assets/images/bro.jpeg'},
-      {'title': 'தமிழ்', 'image': 'assets/images/bro.jpeg'},
-    ];
-
-    final genres = [
-      {'title': 'Romance', 'image': 'assets/images/bro.jpeg'},
-      {'title': 'Drama', 'image': 'assets/images/bro.jpeg'},
-      {'title': 'Family', 'image': 'assets/images/bro.jpeg'},
-    ];
-
     return Container(
       color: Colors.black,
       child: Column(
@@ -553,12 +615,12 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
         children: [
           buildCategorySection(
             'Popular Languages',
-            languages,
+            languageSelect,
           ),
-          const SizedBox(height: 24),
-          buildCategorySection(
+          sh20,
+          buildCategorySectionTwo(
             'Popular Genres',
-            genres,
+            genreListSelect,
           ),
         ],
       ),
@@ -688,9 +750,9 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   left: 40,
                   right: 40,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
-                      color: Color(0xff1f4143),
+                      color: const Color(0xff1f4143),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Center(
@@ -737,7 +799,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   left: 15,
                   top: 10,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                     decoration: BoxDecoration(
                       color: blue,
                       borderRadius: BorderRadius.circular(5.r),
@@ -757,9 +819,9 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   left: 40,
                   right: 40,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
-                      color: Color(0xff1f4143),
+                      color: const Color(0xff1f4143),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Center(
@@ -780,7 +842,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
 
   Widget carasolBanner(int index) {
     return Container(
-      margin: EdgeInsets.only(left: 16, right: 16, top: 16),
+      margin: const EdgeInsets.only(left: 16, right: 16, top: 16),
       height: 240.h,
       decoration: BoxDecoration(
           color: GlobelColors.bottomSheetColor,
@@ -853,13 +915,13 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
     return SizedBox(
       height: 160.h,
       child: ListView.builder(
-        itemCount: 9,
+        itemCount: matchList.length,
         padding: EdgeInsets.symmetric(horizontal: 16.h),
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 2.w),
-            child: Container(
+            child: SizedBox(
               width: 200.w,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -868,27 +930,45 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(5.0.r),
-                        child: Image.asset(
-                          'assets/images/p1.jpg',
+                        child: Image.network(
+                          matchList[index].imageUrl.toString(),
                           width: 200.w,
                           height: 90.h,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      Positioned(
+                      if(matchList[index].isLive==true)Positioned(
                           left: 10.w,
                           bottom: 10.h,
                           right: 20.w,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
+                              if(matchList[index].isLive==true)   const Icon(
                                 Icons.play_arrow,
                                 color: primaryColor,
                               ),
                               TextCustom(
-                                text: "Live",
-                                fontWeight: FontWeight.bold,
+                                text: matchList[index].time.toString(),
+                                fontWeight: FontWeight.bold,color: matchList[index].isLive==true?Colors.red:primaryColor,
+                              )
+                            ],
+                          )),
+
+                      if(matchList[index].isLive==false)Positioned(
+
+                          bottom: 10.h,
+                          right: 20.w,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if(matchList[index].isLive==true)   const Icon(
+                                Icons.play_arrow,
+                                color: primaryColor,
+                              ),
+                              TextCustom(
+                                text: matchList[index].time.toString(),
+                                fontWeight: FontWeight.bold,color: matchList[index].isLive==true?Colors.red:primaryColor,
                               )
                             ],
                           ))
@@ -903,11 +983,11 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                         SizedBox(
                           width: 150,
                           child: TextCustom(
-                            text: 'Telugu Titans vs Haryana Steelers',
+                            text: matchList[index].name.toString(),
                             overflow: TextOverflow.visible,
                           ),
                         ),
-                        Icon(
+                        const Icon(
                           Icons.more_vert_outlined,
                           color: primaryColor,
                         )
@@ -931,12 +1011,12 @@ class MovieCard extends StatelessWidget {
   final String imageUrl;
 
   const MovieCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.data,
     required this.tag,
     required this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -948,7 +1028,7 @@ class MovieCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
           ),
-          margin: EdgeInsets.only(right: 16),
+          margin: const EdgeInsets.only(right: 16),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
@@ -962,7 +1042,7 @@ class MovieCard extends StatelessWidget {
             left: 15,
             top: 10,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
               decoration: BoxDecoration(
                 color: blue,
                 borderRadius: BorderRadius.circular(5.r),
@@ -980,9 +1060,9 @@ class MovieCard extends StatelessWidget {
           left: 40,
           right: 40,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Color(0xff1f4143),
+              color: const Color(0xff1f4143),
               borderRadius: BorderRadius.circular(4),
             ),
             child: TextCustom(

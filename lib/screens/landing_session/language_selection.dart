@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hotstar/customs/custom_button.dart';
 import 'package:hotstar/customs/custom_colors.dart';
 import 'package:hotstar/customs/text_custom.dart';
+import 'package:hotstar/model/language_model.dart';
 import 'package:hotstar/network/network_home.dart';
 import 'package:hotstar/screens/bottom_screens/bottom_appbar_page.dart';
 
@@ -13,44 +14,20 @@ class LanguageSelectionPage extends StatefulWidget {
 }
 
 class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
-  final List<LanguageOption> languages = [
-    LanguageOption(
-        name: 'Hindi',
-        nativeName: 'हिन्दी',
-        imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'English',
-        nativeName: 'English',
-        imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'Tamil', nativeName: 'தமிழ்', imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'Telugu',
-        nativeName: 'తెలుగు',
-        imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'Malayalam',
-        nativeName: 'മലയാളം',
-        imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'Bengali',
-        nativeName: 'বাংলা',
-        imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'Marathi',
-        nativeName: 'मराठी',
-        imageUrl: 'assets/images/bro.jpeg'),
-    LanguageOption(
-        name: 'Kannada',
-        nativeName: 'ಕನ್ನಡ',
-        imageUrl: 'assets/images/bro.jpeg'),
+   List<Language> languages = [
   ];
 
   final Set<String> selectedLanguages = {};
   @override
   void initState() {
-    HomeNetWork().getMovieData();
+   getLanguages();
     super.initState();
+  }
+  void getLanguages()async{
+    languages=await HomeNetWork().getLangaugeData();
+    setState(() {
+
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -59,7 +36,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Stack(
+          child: languages.isEmpty?Center(child: CircularProgressIndicator(),):Stack(
             children: [
               SingleChildScrollView(
                 child: ConstrainedBox(constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height,
@@ -109,7 +86,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                                   if (isSelected) {
                                     selectedLanguages.remove(language.name);
                                   } else {
-                                    selectedLanguages.add(language.name);
+                                    selectedLanguages.add(language.name.toString());
                                   }
                                 });
                               },
@@ -200,7 +177,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 }
 
 class LanguageCard extends StatelessWidget {
-  final LanguageOption language;
+  final Language language;
   final bool isSelected;
 
   const LanguageCard({
@@ -220,8 +197,8 @@ class LanguageCard extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            language.imageUrl,
+          Image.network(
+            language.bannerImageUrl.toString(),
             fit: BoxFit.cover,
           ),
           Container(
@@ -236,26 +213,26 @@ class LanguageCard extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            left: 12.w,
-            bottom: 12.h,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextCustom(
-                  text: language.nativeName,
-                  fontWeight: FontWeight.bold,
-                  textSize: 10.sp,
-                ),
-                TextCustom(
-                  text: language.name,
-                  color: primaryColor.withOpacity(0.7),
-                  textSize: 9.sp,
-                ),
-              ],
-            ),
-          ),
+          // Positioned(
+          //   left: 12.w,
+          //   bottom: 12.h,
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     mainAxisSize: MainAxisSize.min,
+          //     children: [
+          //       TextCustom(
+          //         text: language.,
+          //         fontWeight: FontWeight.bold,
+          //         textSize: 10.sp,
+          //       ),
+          //       TextCustom(
+          //         text: language.name.toString(),
+          //         color: primaryColor.withOpacity(0.7),
+          //         textSize: 9.sp,
+          //       ),
+          //     ],
+          //   ),
+          // ),
           if (isSelected)
             Positioned(
               top: 4.h,

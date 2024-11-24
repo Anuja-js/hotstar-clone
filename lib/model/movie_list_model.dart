@@ -75,7 +75,7 @@ class Movie {
     "type": typeValues.reverse[type],
     "genre": genre == null ? [] : List<dynamic>.from(genre!.map((x) => x)),
     "rating": rating,
-    "language": languageValues.reverse[language],
+    "language": language,
     "description": description,
     "poster_url": posterUrl,
     "is_free": isFree,
@@ -84,21 +84,21 @@ class Movie {
   };
 }
 
-enum Language {
-  ENGLISH,
-  HINDI,
-  MALAYALAM,
-  SPANISH,
-  TAMIL
-}
+// enum Language {
+//   ENGLISH,
+//   HINDI,
+//   MALAYALAM,
+//   SPANISH,
+//   TAMIL
+// }
 
-final languageValues = EnumValues({
-  "English": Language.ENGLISH,
-  "Hindi": Language.HINDI,
-  "Malayalam": Language.MALAYALAM,
-  "Spanish": Language.SPANISH,
-  "Tamil": Language.TAMIL
-});
+// final languageValues = EnumValues({
+//   "English": Language.ENGLISH,
+//   "Hindi": Language.HINDI,
+//   "Malayalam": Language.MALAYALAM,
+//   "Spanish": Language.SPANISH,
+//   "Tamil": Language.TAMIL
+// });
 
 enum Type {
   MOVIE,
