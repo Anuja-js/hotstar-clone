@@ -124,7 +124,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      carasolBanner(4),
+                   if  ( newAndHot.isNotEmpty)carasolBanner(4),
                       carasolSlider(),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -152,7 +152,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                       latestReleases(),
                       const BrandGrid(),
                       buildContent(),
-                      carasolBanner(1),
+                      if  ( newAndHot.isNotEmpty)  carasolBanner(1),
                       buildSection(
                         title: 'Top 10 in India Today',
                         language: true,
