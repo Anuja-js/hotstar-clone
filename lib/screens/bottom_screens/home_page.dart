@@ -12,6 +12,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../model/language_model.dart';
 import '../../model/movie_list_model.dart';
+import '../../model/new_and_hot.dart';
 import '../../network/network_home.dart';
 
 class HotstarHomePage extends StatefulWidget {
@@ -36,6 +37,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
     getMovieData();
     getMatch();
     getGenre();
+    getNewAndHot();
     getLanguages();
     scontol.addListener(() {
       final bool shouldShowBottomSheet = scontol.offset > 0.1;
@@ -53,10 +55,19 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
     super.dispose();
   }
 
+  List<Datum> newAndHot = [];
+
+  void getNewAndHot() async {
+    newAndHot = await HomeNetWork().getNewAndHotData();
+    setState(() {});
+  }
+
   void getLanguages() async {
     languageSelect = await HomeNetWork().getLangaugeData();
     setState(() {});
-  }void getMatch() async {
+  }
+
+  void getMatch() async {
     matchList = await HomeNetWork().getMatchData();
     setState(() {});
   }
@@ -106,14 +117,14 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   })
               : sh5,
           backgroundColor: black,
-          body: SingleChildScrollView(
-            controller: scontol,
-            child: movieList.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
+          body: movieList.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  controller: scontol,
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      carasolBanner(7),
+                      carasolBanner(4),
                       carasolSlider(),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -222,7 +233,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                       sh50,
                     ],
                   ),
-          ),
+                ),
         ),
       ),
     );
@@ -269,16 +280,24 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
     return Column(
       children: [
         CarouselSlider(
-          items: movieList
+          items: newAndHot
               .map(
-                (movie) => Container(
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(movie.posterUrl ?? ''),
-                      fit: BoxFit.cover,
+                (movie) => Stack(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(movie.posterUrl ?? ''),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
+                    Positioned(
+                        bottom: 5,left: 35,
+                        right: 10,
+                        child: TextCustom(text: movie.title.toString(),fontWeight: FontWeight.bold,textSize: 25.sp,color:Colors.grey,))
+                  ],
                 ),
               )
               .toList(),
@@ -301,30 +320,25 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
           height: 40.h,
           child: Column(
             children: [
-              if (movieList[currentIndex].seasons != null)
+              if (newAndHot[currentIndex].seasons != null)
                 Center(
                     child: TextCustom(
                   text: "New Season",
                   color: GlobelColors.tickBlue,
                 )),
-              if (movieList[currentIndex].isNewRelease! &&
-                  movieList[currentIndex].seasons == null)
+              if (newAndHot[currentIndex].isNewRelease! &&
+                  newAndHot[currentIndex].seasons == null)
                 Center(
                     child: TextCustom(
                   text: "New Release",
                   color: GlobelColors.tickBlue,
                 )),
-              if (movieList[currentIndex].genre!.isNotEmpty)
+              if (newAndHot[currentIndex].genre!.isNotEmpty)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextCustom(
-                        text: movieList[currentIndex]
-                            .genre
-                            .toString()
-                            .replaceAll("[", " ")
-                            .replaceAll("]", " ")
-                            .replaceAll(",", " ."))
+                        text: "${newAndHot[currentIndex].genre![0].name} . ${newAndHot[currentIndex].genre![1].name}")
                   ],
                 ),
             ],
@@ -347,7 +361,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                     color: primaryColor,
                   ),
                   sw10,
-                  if (movieList[currentIndex].isFree!)
+                  if (newAndHot[currentIndex].isFree!)
                     Text.rich(
                       TextSpan(
                         text: 'Watch',
@@ -369,7 +383,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                       ),
                       textAlign: TextAlign.start,
                     ),
-                  if (!movieList[currentIndex].isFree!)
+                  if (!newAndHot[currentIndex].isFree!)
                     Text.rich(
                       TextSpan(
                         text: 'Subscribe ',
@@ -750,7 +764,8 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   left: 40,
                   right: 40,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
                       color: const Color(0xff1f4143),
                       borderRadius: BorderRadius.circular(4),
@@ -799,7 +814,8 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   left: 15,
                   top: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                     decoration: BoxDecoration(
                       color: blue,
                       borderRadius: BorderRadius.circular(5.r),
@@ -819,7 +835,8 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   left: 40,
                   right: 40,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
                       color: const Color(0xff1f4143),
                       borderRadius: BorderRadius.circular(4),
@@ -850,7 +867,7 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
       child: Stack(
         children: [
           Image.network(
-            movieList[index].posterUrl.toString(),
+            newAndHot[index].posterUrl.toString(),
             width: double.infinity,
             fit: BoxFit.cover,
             height: 176.h,
@@ -875,12 +892,12 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextCustom(
-                      text: movieList[index].title.toString(),
+                      text: newAndHot[index].title.toString(),
                       textSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
                     TextCustom(
-                      text: movieList[index].year.toString(),
+                      text: newAndHot[index].year.toString(),
                       color: primaryColor.withOpacity(0.6),
                       overflow: TextOverflow.visible,
                     ),
@@ -937,41 +954,49 @@ class _HotstarHomePageState extends State<HotstarHomePage> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      if(matchList[index].isLive==true)Positioned(
-                          left: 10.w,
-                          bottom: 10.h,
-                          right: 20.w,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if(matchList[index].isLive==true)   const Icon(
-                                Icons.play_arrow,
-                                color: primaryColor,
-                              ),
-                              TextCustom(
-                                text: matchList[index].time.toString(),
-                                fontWeight: FontWeight.bold,color: matchList[index].isLive==true?Colors.red:primaryColor,
-                              )
-                            ],
-                          )),
-
-                      if(matchList[index].isLive==false)Positioned(
-
-                          bottom: 10.h,
-                          right: 20.w,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if(matchList[index].isLive==true)   const Icon(
-                                Icons.play_arrow,
-                                color: primaryColor,
-                              ),
-                              TextCustom(
-                                text: matchList[index].time.toString(),
-                                fontWeight: FontWeight.bold,color: matchList[index].isLive==true?Colors.red:primaryColor,
-                              )
-                            ],
-                          ))
+                      if (matchList[index].isLive == true)
+                        Positioned(
+                            left: 10.w,
+                            bottom: 10.h,
+                            right: 20.w,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (matchList[index].isLive == true)
+                                  const Icon(
+                                    Icons.play_arrow,
+                                    color: primaryColor,
+                                  ),
+                                TextCustom(
+                                  text: matchList[index].time.toString(),
+                                  fontWeight: FontWeight.bold,
+                                  color: matchList[index].isLive == true
+                                      ? Colors.red
+                                      : primaryColor,
+                                )
+                              ],
+                            )),
+                      if (matchList[index].isLive == false)
+                        Positioned(
+                            bottom: 10.h,
+                            right: 20.w,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (matchList[index].isLive == true)
+                                  const Icon(
+                                    Icons.play_arrow,
+                                    color: primaryColor,
+                                  ),
+                                TextCustom(
+                                  text: matchList[index].time.toString(),
+                                  fontWeight: FontWeight.bold,
+                                  color: matchList[index].isLive == true
+                                      ? Colors.red
+                                      : primaryColor,
+                                )
+                              ],
+                            ))
                     ],
                   ),
                   Padding(

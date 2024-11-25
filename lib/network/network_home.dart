@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hotstar/model/genre_model.dart';
 import 'package:hotstar/model/language_model.dart';
 import 'package:hotstar/model/movie_list_model.dart';
+import 'package:hotstar/model/new_and_hot.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/match_list.dart';
@@ -24,7 +25,26 @@ class HomeNetWork{
         print('Request failed with status: ${response.statusCode}.');
       }
     }
-  }getMatchData()async{
+  }
+   getNewAndHotData()async{
+    final url=Uri.parse("https://run.mocky.io/v3/690efb15-7d3f-4d3f-a854-20d8af209eea");
+    final response=await http.get(url,headers: {
+      'content-type': 'application/json',
+    });
+    if (response.statusCode == 200) {
+      NewAndHotList latestFromJson = NewAndHotList.fromJson(json.decode(response.body));
+      return latestFromJson.data;
+
+
+
+    } else {
+      if (kDebugMode) {
+        print('Request failed with status: ${response.statusCode}.');
+      }
+    }
+  }
+
+  getMatchData()async{
     final url=Uri.parse("https://run.mocky.io/v3/d16a1a3c-0928-4361-8fbf-ca9e62d381fa");
     final response=await http.get(url,headers: {
       'content-type': 'application/json',

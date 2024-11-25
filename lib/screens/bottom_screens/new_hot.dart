@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hotstar/customs/custom_button.dart';
 import 'package:hotstar/customs/custom_colors.dart';
 import 'package:hotstar/customs/custom_elevated_button.dart';
 import 'package:hotstar/customs/text_custom.dart';
+import 'package:hotstar/model/new_and_hot.dart';
 
-class NewAndHot extends StatelessWidget {
-  const NewAndHot({Key? key}) : super(key: key);
+import '../../network/network_home.dart';
+
+class NewAndHot extends StatefulWidget {
+  const NewAndHot({super.key});
+
+  @override
+  State<NewAndHot> createState() => _NewAndHotState();
+}
+
+class _NewAndHotState extends State<NewAndHot> {
+  List<Datum> newAndHot=[];
+  @override
+  void initState() {
+    // TODO: implement initState
+    getNewAndHot();
+    super.initState();
+  }
+  void getNewAndHot() async {
+    newAndHot = await HomeNetWork().getNewAndHotData();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,51 +57,34 @@ class NewAndHot extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body:  TabBarView(
           children: [
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  ShowCard(
-                    name: "Anupama",
-                    title: 'Dance your troubles away like Anupama',
-                    subtitle: '10 Saal Baad',
-                    category: 'Drama',
-                    timePosted: '2m',
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: newAndHot.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemBuilder: (BuildContext context, int index) {
+                 return ShowCard(
+                    name: newAndHot[index].title.toString(),
+                    title: newAndHot[index].description.toString(),
+                    subtitle: newAndHot[index].language.toString(),
+                    category:  newAndHot[index].genre![1].name.toString().toString(),
+                    timePosted:  newAndHot[index].duration.toString(),
                     imageUrl:
-                        "assets/images/p3.jpeg",
-                  ),
-                  ShowCard(
-                    name: "Anupama",
-                    title: 'Dance your troubles away like Anupama',
-                    subtitle: '10 Saal Baad',
-                    category: 'Drama',
-                    timePosted: '2m',
-                    imageUrl:
-                    "assets/images/p3.jpeg",
-                  ), ShowCard(
-                    name: "Anupama",
-                    title: 'Dance your troubles away like Anupama',
-                    subtitle: '10 Saal Baad',
-                    category: 'Drama',
-                    timePosted: '2m',
-                    imageUrl:
-                    "assets/images/p3.jpeg",
-                  ),
-
-
-                ],
-              ),
+               newAndHot[index].posterUrl.toString(), free:  newAndHot[index].isFree==true,
+                  );
+              },
             ),
-            // Tab 2 Content
-            Center(
+
+            const Center(
               child: Text(
                 'Coming Soon Content',
                 style: TextStyle(color: Colors.white),
               ),
             ),
             // Tab 3 Content
-            Center(
+            const Center(
               child: Text(
                 'Shots Content',
                 style: TextStyle(color: Colors.white),
@@ -102,16 +104,16 @@ class ShowCard extends StatelessWidget {
   final String category;
   final String timePosted;
   final String imageUrl;
-
+final bool free;
   const ShowCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.name,
     required this.subtitle,
     required this.category,
     required this.timePosted,
-    required this.imageUrl,
-  }) : super(key: key);
+    required this.imageUrl,required this.free,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +126,7 @@ class ShowCard extends StatelessWidget {
           // Show Image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            child: Image.asset(
+            child: Image.network(
               imageUrl,
               height: 200.h,
               width: double.infinity,
@@ -141,7 +143,7 @@ class ShowCard extends StatelessWidget {
                 // Thumbnail
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: Image.asset(
+                  child: Image.network(
                     imageUrl,
                     width: 45.w,
                     height: 45.h,
@@ -158,7 +160,7 @@ class ShowCard extends StatelessWidget {
                         textSize: 10.sp,
                       ),
                       TextCustom(
-                       text:  title,overflow: TextOverflow.visible,
+                       text:  title,maxLines: 2,
                        textSize: 10.sp,
                       ),
                      sh5,
@@ -171,7 +173,7 @@ class ShowCard extends StatelessWidget {
                          sw5,
                            TextCustom(
                            text:  "•",color: primaryColor.withOpacity(0.5),
-                           
+
                           ),
                          sw5,
                           TextCustom(
@@ -199,14 +201,14 @@ class ShowCard extends StatelessWidget {
           // Watch Button
           Row(
             children: [
-              SizedBox(width: MediaQuery.of(context).size.width/1.3,
-                child: CustomElevatedButton(label: "Watch Show",textColor: black,backgroundColor: primaryColor,
+              Expanded(
+                child: CustomElevatedButton(label:free? "Watch Show":"Subscribe to Watch",textColor: black,backgroundColor: primaryColor,
                     borderRadius: 5.r,
-                    icon: Icon(Icons.play_arrow,color: black,),fontSize: 12.sp,
+                    icon: const Icon(Icons.play_arrow,color: black,),fontSize: 12.sp,
                     onPressed: (){}),
               ),sw10,
-              SizedBox(width: 40.w,height: 40.h,child: CustomElevatedButton(label: "+", onPressed: (){},textColor: primaryColor,
-                  backgroundColor:  Color(0xff222327)),)
+            if(free==true)  SizedBox(width: 40.w,height: 40.h,child: CustomElevatedButton(label: "+", onPressed: (){},textColor: primaryColor,
+                  backgroundColor:  const Color(0xff222327)),)
 
             ],
           ),
